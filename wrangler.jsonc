@@ -1,8 +1,0 @@
-{
-  // il name deve combaciare con il nome del Worker nel dashboard Cloudflare
-  "name": "perks0934-site",
-  "compatibility_date": "2026-07-09",
-  "assets": {
-    "directory": "./public"
-  }
-}

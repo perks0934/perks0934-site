@@ -1,32 +1,39 @@
 # perks:0934
 
-Sito single page di perks:0934. Statico, servito come Cloudflare Worker con static assets.
+Sito di perks:0934 — il redesign a 4 schermate scroll-snap (hero ASCII ditherato,
+standfirst, archive, documents/collaborators/footer). Monocromo, ABC Diatype,
+look ditherato. Servito come Cloudflare Worker con static assets.
 
 ## Struttura
-- `public/index.html` — la pagina intera (ASCII animato del ritratto incorporato).
-- `wrangler.jsonc` — configurazione del Worker: serve la cartella `public/`.
+- `public/index.html` — la pagina consegnata, singolo file autonomo (offline-ready:
+  font, JS, immagini, favicon e OG tutti inline). **Source of truth del design — non ridisegnare.**
+- `public/og-image.png` — immagine OG/Twitter, servita a `/og-image.png`.
+- `src/index.js` — Worker: gate teaser + serve gli asset.
+- `wrangler.toml` — config del Worker (`name = "perks0934-site"`, assets + var TEASER).
+- `archive.csv` — dati archivio (Phase-2, non ancora wired nella pagina).
 
-## Deploy (Cloudflare Workers, stesso giro di baselife)
-Il Worker è collegato a questo repo. A ogni push su `main` la build esegue:
+## Teaser gate
+Pubblico di default = **teaser ON** (solo l'animazione hero; screen 2–4 e toggle nascosti).
+Il flag è reale, non hard-baked:
+- **Accendere il sito completo** senza rebuild: metti `TEASER = "false"` in `wrangler.toml` e `npx wrangler deploy`.
+- **Override per singola richiesta** (preview): aggiungi `?full=1` all'URL.
+
+Il Worker riscrive l'HTML servito (flip del prop `teaser` del bundle) senza toccare il design.
+
+## Deploy
+Deploy manuale via CLI (nessuna CI Git attiva al momento):
 
     npx wrangler deploy
 
-che pubblica il contenuto di `public/`. Nel pannello Cloudflare, sezione build:
-- Build command: vuoto
-- Deploy command: `npx wrangler deploy`
-- Path: `/`
-- API token: uno con permesso Workers Scripts:Edit
+- Worker: `perks0934-site` (account perks0934@gmail.com)
+- Preview: `perks0934-site.perks0934.workers.dev`
+- Produzione: **perks0934.xyz** (Workers Custom Domain, gestito lato Cloudflare, preservato tra i deploy)
 
-Il campo `name` in `wrangler.jsonc` deve combaciare con il nome del Worker nel dashboard.
-Dopo il primo deploy il sito è raggiungibile su un indirizzo `*.workers.dev`.
-
-## Dominio
-Custom domain `perks0934.xyz` dal Worker (Settings, Domains & Routes). Il dominio va gestito come zona Cloudflare: su GoDaddy imposta i due nameserver che Cloudflare fornisce.
-
-## Modifiche rapide
-- Archivio: array `ARCHIVE` nello script in fondo a `public/index.html`.
-- Password del documento: `DOC_PASSWORD` e `DOC_LINK`.
-- Dimensione del riquadro ASCII: `margin` nel blocco animazione, o `width` e `margin` di `.hero`.
-- Font: ABC Diatype con fallback sans; per servirlo a tutti, ospita i woff2 e attiva `@font-face`.
+## Backend da wire-are (Phase-2, ancora placeholder)
+Tutti stub client-side nell'artifact, visibili solo con `?full=1`:
+- Archive → bind a `archive.csv` o Google Sheet (col: date,name,type,status,description,url,image)
+- Immagini progetto (`/img/`) rese con dithering Bayer + video ditherati b/n
+- Access gate: password reale (ora `0934` placeholder) + URL documento protetto (check server-side)
+- Form: candidatura + due "request document" → endpoint di submission reali
 
 Tutti i diritti riservati.
