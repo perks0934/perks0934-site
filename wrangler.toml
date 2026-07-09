@@ -1,0 +1,22 @@
+name = "perks0934-site"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+workers_dev = true
+
+# Teaser gate. Public default = teaser ON (hero only).
+# Flip to "false" to light up the full site with `wrangler deploy` — no rebuild.
+# Per-request override: append ?full=1 to force the full site (e.g. previews).
+[vars]
+TEASER = "true"
+
+# Self-contained artifact + og-image live in ./public and are served via the
+# ASSETS binding. run_worker_first lets the Worker rewrite the HTML (teaser gate)
+# before the static asset is returned.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+
+# NOTE: the production custom domain perks0934.xyz is bound to this worker as a
+# Workers Custom Domain (managed independently of this config) and is preserved
+# across deploys. workers.dev preview: perks0934-site.perks0934.workers.dev
