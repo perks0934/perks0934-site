@@ -7,8 +7,11 @@
 // later with a config change instead of a rebuild.
 //
 // Resolution order for "show the full site":
-//   1. ?full=1  (any non-empty, non-"0"/"false" value) — per-request override
-//   2. env.TEASER === "false" — the public default
+//   1. ?full=<v>  — explicit per-request override, wins both ways
+//      (?full=1 forces full, ?full=0 forces teaser, anywhere)
+//   2. env.TEASER === "false" — flips the public default at launch
+//   3. *.workers.dev — the preview URL always shows the FULL site, so it can be
+//      reviewed while the custom domain (production) stays in teaser
 // Otherwise: teaser (hero only).
 
 const TEASER_DEFAULT_TRUE = "&quot;default&quot;:true"; // the (unique) teaser prop default in data-props
@@ -18,8 +21,10 @@ const TEASER_FALLBACK_FALSE = "this.props.teaser ?? false";
 
 function wantsFull(url, env) {
   const p = url.searchParams.get("full");
-  if (p !== null && p !== "0" && p !== "false") return true;
-  return (env.TEASER ?? "true") === "false";
+  if (p !== null) return p !== "0" && p !== "false"; // explicit override wins
+  if ((env.TEASER ?? "true") === "false") return true; // launch: public default full
+  if (url.hostname.endsWith(".workers.dev")) return true; // preview shows full site
+  return false; // production custom domain: teaser
 }
 
 export default {
